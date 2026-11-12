@@ -1,1 +1,1 @@
-select actor_role, action, target_table, at from private.audit_log order by id;
+select count(*) from public.students where display_name = 'Intruso Prueba';
