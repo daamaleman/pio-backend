@@ -14,6 +14,7 @@
 --   3.° A  primary   Ana   3A·AN·35   (no students)
 --   1.er A secondary Ana   1A·AN·46   Daniela Hernández 4826 · José Téllez 7391   (AI chat ON)
 --   1.er A secondary Luis  1A·LU·58   Kevin Obando 6240
+-- Assignments: 3.° B → lesson 1 (p3-w1) · 1.er A (Ana) → lesson 1 (s1-w1). Other weeks stay locked.
 -- ============================================================
 
 -- Helper: create a confirmed email/password user in Supabase Auth.
@@ -102,3 +103,19 @@ from (values
   ('30000000-0000-4000-8000-000000000006'::uuid, '6240')
 ) as v(student_id, pin);
 
+-- ---------- Assignments (dates relative to "today" in Managua, so the demo always looks current) ----------
+-- Lesson 1 assigned after the most recent class; due at the next class.
+with today as (select (now() at time zone 'America/Managua')::date as d)
+insert into public.assignments
+  (group_id, lesson_id, assigned_by, class_date, due_date, message, targets_all, notify_families, remind_day_before)
+select g.id, l.id, g.teacher_id,
+       t.d - ((extract(isodow from t.d)::int - g.class_weekday + 7) % 7),
+       t.d - ((extract(isodow from t.d)::int - g.class_weekday + 7) % 7) + 7,
+       v.message, true, v.notify_families, true
+from (values
+  ('3BAN27', 'p3-w1', '¡Hola, chavalos! Esta semana conocemos las gotas de las emociones.', true),
+  ('1AAN46', 's1-w1', 'Esta semana hablamos de los cambios. Cada quien a su ritmo.',       false)
+) as v(class_code, lesson_slug, message, notify_families)
+join public.groups  g on g.class_code = v.class_code
+join public.lessons l on l.slug = v.lesson_slug
+cross join today t;
