@@ -1,2 +1,4 @@
-select n, public.check_rate_limit('test:loop', 3, 60) as allowed
-from generate_series(1, 4) as n;
+   select u.email, s.auth_user_id as linked_to_student
+   from auth.users u
+   left join public.students s on s.auth_user_id = u.id
+   where u.email like '%@students.pio.invalid';

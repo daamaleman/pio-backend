@@ -71,23 +71,38 @@ async function resolveClass(req: Request, body: Record<string, unknown>): Promis
 
 // ---------- Shadow auth user ----------
 // Created lazily on the first successful login if the student doesn't have one yet.
+// Idempotent: if a previous attempt created the user but failed before linking it,
+// we recover that user instead of failing with "email already exists".
 async function ensureShadowUser(studentId: string, authUserId: string | null): Promise<string> {
   if (authUserId) return authUserId;
 
+  const email = `${studentId}@${SHADOW_EMAIL_DOMAIN}`;
+  let userId: string;
+
   const { data, error } = await admin.auth.admin.createUser({
-    email: `${studentId}@${SHADOW_EMAIL_DOMAIN}`,
-    email_confirm: true,
+    email,
+    email_confirm: true,                         // no confirmation email is ever sent
     app_metadata: { kind: "student_shadow" },
   });
-  if (error) throw error;
+
+  if (error) {
+    if (error.code !== "email_exists") throw error;
+    const { data: existingId, error: lookupError } = await admin.rpc("get_auth_user_id_by_email", {
+      p_email: email,
+    });
+    if (lookupError || !existingId) throw lookupError ?? error;
+    userId = existingId as string;
+  } else {
+    userId = data.user.id;
+  }
 
   const { error: linkError } = await admin
     .from("students")
-    .update({ auth_user_id: data.user.id })
+    .update({ auth_user_id: userId })
     .eq("id", studentId);
   if (linkError) throw linkError;
 
-  return data.user.id;
+  return userId;
 }
 
 // ---------- Issue a real Supabase session for the shadow user ----------
