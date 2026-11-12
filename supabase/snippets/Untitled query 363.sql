@@ -1,10 +1,7 @@
 begin;
-select set_config('request.jwt.claims', json_build_object(
-  'sub', 'a0000000-0000-4000-8000-000000000003',
-  'role', 'authenticated', 'app_role', 'director')::text, true);
-set local role authenticated;
+insert into public.lessons (id, slug, level, grade, week, title, parts_count)
+values ('40000000-0000-4000-8000-0000000000aa', 'test-a', 'primary', 3, 1, '{"es":"A"}', 3);
 
-update public.groups set ai_chat_enabled = false
-where id = '20000000-0000-4000-8000-000000000003'
-returning class_code, ai_chat_enabled;
+insert into public.lesson_steps (lesson_id, position, part, kind)
+values ('40000000-0000-4000-8000-0000000000aa', 6, 2, 'minigame');
 rollback;
