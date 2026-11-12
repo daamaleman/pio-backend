@@ -10,8 +10,8 @@
 --   admin@demo.pio          admin
 --
 -- Groups (class code shown as the child sees it)
---   4.° B  primary   Ana   4B·AN·27   María Rivera 3714 · Carlos Martínez 2589 · Sofía López 1593
---   4.° A  primary   Ana   4A·AN·35   (no students)
+--   3.° B  primary   Ana   3B·AN·27   María Rivera 3714 · Carlos Martínez 2589 · Sofía López 1593
+--   3.° A  primary   Ana   3A·AN·35   (no students)
 --   1.er A secondary Ana   1A·AN·46   Daniela Hernández 4826 · José Téllez 7391   (AI chat ON)
 --   1.er A secondary Luis  1A·LU·58   Kevin Obando 6240
 -- ============================================================
@@ -73,9 +73,9 @@ insert into public.groups
   (id, school_id, teacher_id, level, grade, section, class_weekday, language, class_code, school_year, ai_chat_enabled)
 values
   ('20000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001',
-   'a0000000-0000-4000-8000-000000000001', 'primary',   4, 'B', 1, 'es', '4BAN27', 2026, false),
+   'a0000000-0000-4000-8000-000000000001', 'primary',   3, 'B', 1, 'es', '3BAN27', 2026, false),
   ('20000000-0000-4000-8000-000000000002', '10000000-0000-4000-8000-000000000001',
-   'a0000000-0000-4000-8000-000000000001', 'primary',   4, 'A', 3, 'es', '4AAN35', 2026, false),
+   'a0000000-0000-4000-8000-000000000001', 'primary',   3, 'A', 3, 'es', '3AAN35', 2026, false),
   ('20000000-0000-4000-8000-000000000003', '10000000-0000-4000-8000-000000000001',
    'a0000000-0000-4000-8000-000000000001', 'secondary', 1, 'A', 2, 'es', '1AAN46', 2026, true),
   ('20000000-0000-4000-8000-000000000004', '10000000-0000-4000-8000-000000000002',
