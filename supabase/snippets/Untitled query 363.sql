@@ -1,2 +1,2 @@
--- ❌ Código con minúsculas o separadores → class_code check
-update public.groups set class_code = '4b·ana·27' where class_code = '4BANA27';
+insert into public.students (group_id, display_name)
+select id, 'Carlos Martínez' from public.groups where class_code = '4BANA27';
