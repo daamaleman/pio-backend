@@ -1,4 +1,2 @@
-   select u.email, s.auth_user_id as linked_to_student
-   from auth.users u
-   left join public.students s on s.auth_user_id = u.id
-   where u.email like '%@students.pio.invalid';
+update private.student_credentials set locked_until = null, failed_pin_attempts = 0
+where student_id = (select id from public.students where display_name = 'María José Rivera');
