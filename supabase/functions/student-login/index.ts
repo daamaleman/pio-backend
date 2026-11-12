@@ -2,9 +2,25 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 // ---------- Environment (injected automatically by Supabase) ----------
+// New key format (JSON dictionaries) first; legacy keys as fallback (local dev / older projects).
+function readKey(newVar: string, legacyVar: string): string {
+  const json = Deno.env.get(newVar);
+  if (json) {
+    try {
+      const key = JSON.parse(json)?.default;
+      if (typeof key === "string" && key.length > 0) return key;
+    } catch {
+      // not JSON: fall through to the legacy variable
+    }
+  }
+  const legacy = Deno.env.get(legacyVar);
+  if (!legacy) throw new Error(`Missing ${newVar} and ${legacyVar}`);
+  return legacy;
+}
+
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
+const SERVICE_ROLE_KEY = readKey("SUPABASE_SECRET_KEYS", "SUPABASE_SERVICE_ROLE_KEY");
+const ANON_KEY = readKey("SUPABASE_PUBLISHABLE_KEYS", "SUPABASE_ANON_KEY");
 
 // ---------- Tunable limits ----------
 const RESOLVE_LIMIT = { max: 20, windowSeconds: 600 }; // class-code lookups per IP / 10 min
