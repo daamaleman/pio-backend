@@ -49,6 +49,10 @@ const TEXTS: Record<string, Record<string, Text>> = {
     es: { title: "Alguien quiere hablar", body: "Un estudiante pidió hablar. Abrí Pío para ver la solicitud." },
     en: { title: "Someone wants to talk", body: "A student asked to talk. Open Pío to see the request." },
   },
+  risk_alert: {
+    es: { title: "Pío · Atención", body: "Hay una alerta que requiere la atención de orientación." },
+    en: { title: "Pío · Attention", body: "There is an alert that needs counseling's attention." },
+  },
 };
 
 function textFor(kind: string, language: string): Text {
