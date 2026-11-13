@@ -1,0 +1,128 @@
+{
+  "info": {
+    "_postman_id": "f2f97a8c-3a8b-4e8d-9f4f-2a7f8a5c1d01",
+    "name": "Pío backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "supabase_url",
+      "value": "http://127.0.0.1:54321"
+    },
+    {
+      "key": "anon_key",
+      "value": ""
+    },
+    {
+      "key": "director_token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Smoke demo",
+      "item": [
+        {
+          "name": "7 · Login Rosa",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{anon_key}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"rosa.gutierrez@demo.pio\",\n  \"password\": \"Demo1234!\"\n}"
+            },
+            "url": {
+              "raw": "{{supabase_url}}/auth/v1/token?grant_type=password",
+              "host": [
+                "{{supabase_url}}"
+              ],
+              "path": [
+                "auth",
+                "v1",
+                "token"
+              ],
+              "query": [
+                {
+                  "key": "grant_type",
+                  "value": "password"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"login Rosa 200\", () => pm.response.to.have.status(200));",
+                  "pm.environment.set(\"director_token\", pm.response.json().access_token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "8 · School overview",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "apikey",
+                "value": "{{anon_key}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{director_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"p_school_id\": \"10000000-0000-4000-8000-000000000001\"\n}"
+            },
+            "url": {
+              "raw": "{{supabase_url}}/rest/v1/rpc/school_overview",
+              "host": [
+                "{{supabase_url}}"
+              ],
+              "path": [
+                "rest",
+                "v1",
+                "rpc",
+                "school_overview"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"school_overview 200\", () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"3 groups\", () => pm.expect(body.totals.groups).to.eql(3));",
+                  "pm.test(\"1 active alert\", () => pm.expect(body.totals.active_alerts).to.eql(1));",
+                  "pm.test(\"school climate visible\", () => pm.expect(body.climate.hidden).to.eql(false));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

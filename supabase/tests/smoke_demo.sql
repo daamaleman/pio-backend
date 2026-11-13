@@ -5,7 +5,7 @@
 with checks (area, check_name, op, expected, actual) as (
   values
   -- Schema
-  ('1 Esquema',  'Migraciones aplicadas',             '=',  19, (select count(*) from supabase_migrations.schema_migrations)),
+  ('1 Esquema',  'Migraciones aplicadas',             '=',  20, (select count(*) from supabase_migrations.schema_migrations)),
   ('1 Esquema',  'Hook del JWT existe',                '=',  1,  (select count(*) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
                                                                    where n.nspname = 'public' and p.proname = 'custom_access_token_hook')),
   ('1 Esquema',  'Cron de alertas activo',             '=',  1,  (select count(*) from cron.job where jobname = 'detect-support-alerts' and active)),
