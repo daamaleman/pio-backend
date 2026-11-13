@@ -237,7 +237,11 @@ max_frequency = "1s"
 # Number of characters used in the email OTP.
 otp_length = 6
 # Number of seconds before the email OTP expires (defaults to 1 hour).
-otp_expiry = 3600
+otp_expiry = 86400
+
+[auth.email.template.invite]
+subject = "Te invitaron a Pío · Siento y Crezco"
+content_path = "./supabase/templates/invite.html"
 
 # Use a production-ready SMTP server
 # [auth.email.smtp]
@@ -446,3 +450,14 @@ entrypoint = "./functions/import-students/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/import-students/*.html" ]
+
+[functions.invite-staff]
+enabled = true
+verify_jwt = false
+import_map = "./functions/invite-staff/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/invite-staff/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/invite-staff/*.html" ]
