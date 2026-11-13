@@ -15,7 +15,8 @@ jobs:
         with:
           version: latest
 
-      # Starts Postgres only, applies every migration and the seed
-      - run: supabase db start
+      # Full local stack (Auth, Storage, etc.): some migrations need their schemas.
+      # Slower than db start (~2–3 min) but identical to local development.
+      - run: supabase start
 
       - run: supabase test db
