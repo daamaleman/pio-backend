@@ -41,6 +41,10 @@ const TEXTS: Record<string, Record<string, Text>> = {
     es: { title: "Mañana es la clase", body: "Si te falta terminar tu lección, todavía estás a tiempo." },
     en: { title: "Class is tomorrow", body: "If your lesson isn't finished yet, there's still time." },
   },
+  pending_reminder: {
+    es: { title: "Tu lección te espera", body: "Pío guardó tu lección de la semana. ¡Todavía estás a tiempo!" },
+    en: { title: "Your lesson is waiting", body: "Pío saved this week's lesson for you. There's still time!" },
+  },
   new_alert: {
     es: { title: "Pío · Apoyo", body: "Hay una nueva alerta de apoyo en tu grupo." },
     en: { title: "Pío · Support", body: "There is a new support alert in your group." },
