@@ -158,7 +158,7 @@ max_indexes = 5
 enabled = true
 # The base URL of your website. Used as an allow-list for redirects and for constructing URLs used
 # in emails.
-site_url = "http://127.0.0.1:3000"
+site_url = "http://localhost:5173"
 # The public URL that Auth serves on. Defaults to the API external URL with `/auth/v1` appended.
 # external_url = ""
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
@@ -242,6 +242,10 @@ otp_expiry = 86400
 [auth.email.template.invite]
 subject = "Te invitaron a Pío · Siento y Crezco"
 content_path = "./supabase/templates/invite.html"
+
+[auth.email.template.recovery]
+subject = "Tu enlace para una contraseña nueva en Pío"
+content_path = "./supabase/templates/recovery.html"
 
 # Use a production-ready SMTP server
 # [auth.email.smtp]
