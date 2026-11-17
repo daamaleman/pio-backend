@@ -5,11 +5,24 @@
 with checks (area, check_name, op, expected, actual) as (
   values
   -- Schema
-  ('1 Esquema',  'Migraciones aplicadas',             '=',  33, (select count(*) from supabase_migrations.schema_migrations)),
+  ('1 Esquema',  'Migraciones aplicadas',             '=',  35, (select count(*) from supabase_migrations.schema_migrations)),
   ('1 Esquema',  'Hook del JWT existe',                '=',  1,  (select count(*) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
                                                                    where n.nspname = 'public' and p.proname = 'custom_access_token_hook')),
   ('1 Esquema',  'Cron de alertas activo',             '=',  1,  (select count(*) from cron.job where jobname = 'detect-support-alerts' and active)),
   ('1 Esquema',  'Bucket lesson-media (privado)',      '=',  1,  (select count(*) from storage.buckets where id = 'lesson-media' and not public)),
+  -- Portal (migrations 30–35)
+  ('5 Portal',   'RPC del portal (6)',                 '=',  6,  (select count(distinct p.proname) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+                                                                   where n.nspname = 'public' and p.proname in ('assign_lesson', 'remind_pending', 'record_family_sheet',
+                                                                         'add_observation', 'submit_anonymous_question', 'set_question_status'))),
+  ('5 Portal',   'Sin TRUNCATE para la API (mig. 32)', '=',  0,  (select count(*) from pg_tables t where t.schemaname = 'public'
+                                                                   and (has_table_privilege('anon', format('public.%I', t.tablename), 'TRUNCATE')
+                                                                     or has_table_privilege('authenticated', format('public.%I', t.tablename), 'TRUNCATE')))),
+  ('5 Portal',   'Fichas: columna source (mig. 33)',   '=',  1,  (select count(*) from information_schema.columns
+                                                                   where table_schema = 'public' and table_name = 'family_sheets' and column_name = 'source')),
+  ('5 Portal',   'Tabla de observaciones (mig. 34)',   '=',  1,  (select count(*) from pg_tables where schemaname = 'public' and tablename = 'teacher_observations')),
+  ('5 Portal',   'Buzón sin student_id (mig. 35)',     '=',  0,  (select count(*) from information_schema.columns
+                                                                   where table_schema = 'public' and table_name = 'anonymous_questions' and column_name = 'student_id')),
+  ('5 Portal',   'Buzón: tabla existe (mig. 35)',      '=',  1,  (select count(*) from pg_tables where schemaname = 'public' and tablename = 'anonymous_questions')),
   -- Catalog
   ('2 Catálogo', 'Lecciones',                          '=',  8,  (select count(*) from public.lessons)),
   ('2 Catálogo', 'Mini-juegos',                        '=',  20, (select count(*) from public.minigames)),
@@ -45,6 +58,11 @@ select area, check_name,
 from checks
 order by area, check_name;
 
+/* ------------------------------------------------------------
+   Postman reference (NOT SQL). These are the test scripts of the
+   "Smoke demo" folder in Postman; they live in the collection.
+   Kept here as a comment so this file runs in the SQL Editor.
+------------------------------------------------------------
 pm.test("resolve-class 200", () => pm.response.to.have.status(200));
 const body = pm.response.json();
 pm.test("3BAN27 has 12 students", () => pm.expect(body.students.length).to.eql(12));
@@ -74,3 +92,4 @@ const body = pm.response.json();
 pm.test("12 students", () => pm.expect(body.students).to.eql(12));
 pm.test("6 badges earned", () => pm.expect(body.badges_earned).to.eql(6));
 pm.test("climate visible", () => pm.expect(body.climate.hidden).to.eql(false));
+------------------------------------------------------------ */

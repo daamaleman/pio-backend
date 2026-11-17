@@ -19,7 +19,7 @@
   <img src="https://img.shields.io/badge/estado-MVP%20completo-FF5C93?style=flat-square" alt="Estado: MVP completo" />
   <img src="https://img.shields.io/badge/Supabase-Postgres%2017-3ECF8E?style=flat-square&logo=supabase&logoColor=white" alt="Supabase" />
   <img src="https://img.shields.io/badge/Edge%20Functions-Deno%20%2B%20TypeScript-1D2A5C?style=flat-square&logo=deno&logoColor=white" alt="Deno" />
-  <img src="https://img.shields.io/badge/pgTAP-27%20pruebas-1CABE2?style=flat-square" alt="27 pruebas pgTAP" />
+  <img src="https://img.shields.io/badge/pgTAP-55%20pruebas-1CABE2?style=flat-square" alt="55 pruebas pgTAP" />
   <img src="https://img.shields.io/badge/UAM%20%C2%B7%20UNICEF-Nicaragua%202026-374EA2?style=flat-square" alt="UAM · UNICEF Nicaragua 2026" />
 </p>
 
@@ -92,7 +92,7 @@ Este repositorio es el **backend**: base de datos, reglas de seguridad, funcione
     </td>
     <td valign="top">
       <h3>✅ Calidad</h3>
-      27 pruebas pgTAP de privacidad y reglas de negocio en cada push con GitHub Actions, más una prueba rápida para el día de la demo.
+      55 pruebas pgTAP de privacidad, reglas de negocio y funciones del portal en cada push con GitHub Actions, más una prueba rápida para el día de la demo.
     </td>
   </tr>
 </table>
@@ -148,15 +148,15 @@ flowchart LR
 pio-backend/
 ├─ supabase/
 │  ├─ config.toml              # local config: auth hook, functions, invite email
-│  ├─ migrations/              # 29 versioned migrations
+│  ├─ migrations/              # 35 versioned migrations
 │  ├─ seed.sql                 # demo data (never in production)
 │  ├─ functions/
 │  │  ├─ student-login/        # class code + PIN → session
 │  │  ├─ import-students/      # class list (Excel parsed on the client)
 │  │  ├─ invite-staff/         # staff invitations by email
 │  │  └─ send-push/            # notification queue → Expo Push
-│  ├─ templates/invite.html    # Spanish invitation email
-│  ├─ tests/database/          # pgTAP: 01_privacy, 02_business_rules
+│  ├─ templates/               # branded invite.html and recovery.html
+│  ├─ tests/database/          # pgTAP: 01 privacy … 05 anonymous questions
 │  └─ ops/                     # smoke_demo.sql, staging_push_cron.sql (no secrets)
 ├─ postman/                    # collection + environments
 ├─ docs/assets/                # brand images for this README
@@ -171,9 +171,9 @@ pio-backend/
 git clone https://github.com/daamaleman/pio-backend.git
 cd pio-backend
 
-npx supabase start            # Postgres, Auth, Storage… + 29 migrations + seed
+npx supabase start            # Postgres, Auth, Storage… + 35 migrations + seed
 npx supabase functions serve  # Edge Functions on http://127.0.0.1:54321/functions/v1/
-npx supabase test db          # 27 pgTAP tests
+npx supabase test db          # 55 pgTAP tests
 ```
 
 | Servicio local | URL |
@@ -220,6 +220,9 @@ Las reglas están **en la base de datos**, así que se cumplen aunque una app te
 | Lo que escribe un adolescente en su caja de herramientas no sale del celular | El servidor guarda solo existencia y días de práctica |
 | Sin datos de contacto de las familias | Permiso guardado como versión + fecha; nombres sin números ni @ |
 | Notificaciones sin datos personales | La cola guarda ids; el texto se arma por tipo y lengua |
+| Las observaciones de la docente son solo suyas | RLS por autora; al pedir apoyo, la alerta lleva solo la categoría |
+| El buzón de preguntas es anónimo de verdad | `anonymous_questions` no tiene `student_id` y guarda solo la fecha, sin hora; el límite por lección va en una tabla aparte |
+| La API no puede vaciar tablas | `truncate` y `trigger` revocados para `anon` y `authenticated` |
 | PINs protegidos | bcrypt; 3 intentos y 5 minutos de espera; se muestran una sola vez |
 
 ## ✅ Pruebas
@@ -232,6 +235,10 @@ npx supabase test db
 |---|---|---|
 | `01_privacy.test.sql` | 12 | Quién ve qué: docente, orientación, dirección, estudiante y página pública |
 | `02_business_rules.test.sql` | 15 | Votos únicos, sincronizaciones idempotentes, validaciones de contenido, PIN, autoevaluación y propiedad de los datos |
+| `03_portal_rpcs.test.sql` | 13 | Funciones del portal (migraciones 30–33): asignar lección, recordar a pendientes, ficha en papel y permisos de la API |
+| `04_observations.test.sql` | 6 | Observaciones de la docente (migración 34): solo la ve quien la escribe, otra escuela no puede, orientación recibe la categoría y no el texto |
+| `05_anonymous_questions.test.sql` | 9 | Buzón de preguntas (migración 35): sin vínculo con el estudiante, solo secundaria, límite por lección y estados |
+| **Total** | **55** | |
 
 GitHub Actions (`.github/workflows/db-tests.yml`) levanta la base **desde cero** con las migraciones y el seed, y corre las pruebas en cada push a `main` y en cada pull request.
 
@@ -260,8 +267,10 @@ npx supabase db reset --remote                              # rebuild staging wi
 
 1. `npx supabase db reset --remote`, para que "esta semana" coincida con el día.
 2. Si se muestran notificaciones: correr de nuevo `staging_push_cron.sql` (el reset borra Vault y el cron manual).
-3. `supabase/ops/smoke_demo.sql` en el SQL Editor de staging y el Runner "Smoke demo" de Postman: todo en verde.
-4. Volver a iniciar sesión en las apps.
+3. `supabase/ops/smoke_demo.sql` en el SQL Editor de staging (35 migraciones y las funciones del portal) y el Runner "Smoke demo" de Postman: todo en verde.
+4. Revisar en Storage que siguen los archivos de `lesson-media`.
+5. Si la demo muestra alertas de Daniela o María, crearlas de nuevo desde la app (el seed solo trae la de Carlos).
+6. Volver a iniciar sesión en las apps y en el portal (el reset cierra todas las sesiones).
 
 </details>
 
@@ -272,7 +281,7 @@ npx supabase db reset --remote                              # rebuild staging wi
 - [ ] Lecciones 2 a 8 y versiones en inglés y miskito
 - [ ] Líneas de ayuda confirmadas por UNICEF
 - [ ] Proyecto de producción, CORS por dominio y auditoría de lecturas
-- [ ] Reportes PDF/Excel y publicación de contenido sin migraciones
+- [ ] Publicación de contenido sin migraciones (`content-publish`)
 
 ## 👥 Equipo
 
